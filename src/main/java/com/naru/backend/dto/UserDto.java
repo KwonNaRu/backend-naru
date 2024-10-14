@@ -1,11 +1,9 @@
 package com.naru.backend.dto;
 
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class UserDto {
     @NotEmpty
     private String username;
@@ -15,4 +13,6 @@ public class UserDto {
 
     @NotEmpty
     private String email;
+
+    private String role;
 }

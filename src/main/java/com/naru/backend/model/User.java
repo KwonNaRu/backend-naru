@@ -1,5 +1,10 @@
 package com.naru.backend.model;
 
+import java.util.Arrays;
+import java.util.List;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,7 +29,17 @@ public class User {
 
     private String password;
 
+    @Column(unique = true)
     private String email;
+
+    @ElementCollection
+    private List<String> authorities;
+
+    // 오너 권한
+    List<String> ownerAuthorities = Arrays.asList("OWNER");
+
+    // 게스트 권한
+    List<String> guestAuthorities = Arrays.asList("GUEST");
 
     // 필요한 경우 추가적인 필드를 여기 추가할 수 있습니다.
     // 예: 이메일, 역할, 계정 활성화 여부 등

@@ -1,5 +1,8 @@
 package com.naru.backend.service;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,6 +26,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private static final List<String> ownerAuthorities = Arrays.asList("OWNER");
+    private static final List<String> guestAuthorities = Arrays.asList("GUEST");
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
             AuthenticationManager authenticationManager) {
@@ -34,14 +39,22 @@ public class UserService {
 
     @Transactional
     public User registerUser(UserDto userDto) {
-        if (userRepository.findByUsername(userDto.getUsername()).isPresent()) {
-            throw new RuntimeException("Username already exists");
+        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
         }
 
         User user = new User();
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+
+        // 오너 권한 설정
+        if (userDto.getEmail().equals("kwonnaru@kakao.com")) {
+            user.setAuthorities(ownerAuthorities);
+        } else {
+            // 게스트 권한 설정
+            user.setAuthorities(guestAuthorities);
+        }
 
         return userRepository.save(user);
     }

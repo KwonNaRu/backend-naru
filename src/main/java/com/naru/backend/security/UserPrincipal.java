@@ -1,6 +1,7 @@
 package com.naru.backend.security;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.naru.backend.model.User;
@@ -10,6 +11,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
@@ -29,27 +31,28 @@ public class UserPrincipal implements UserDetails {
     }
 
     public static UserPrincipal create(User user) {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (String authority : user.getAuthorities()) {
+            authorities.add(new SimpleGrantedAuthority(authority));
+        }
         return new UserPrincipal(
                 user.getId(),
                 user.getUsername(),
                 user.getPassword(),
-                // 여기에 사용자 권한을 추가하세요.
-                new ArrayList<>());
+                authorities);
+    }
+
+    public String getRole() {
+        if (authorities.contains("OWNER")) {
+            return "OWNER";
+        } else {
+            return "GUEST";
+        }
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
     }
 
     @Override
@@ -71,6 +74,4 @@ public class UserPrincipal implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
-    // Getters and Setters
 }
