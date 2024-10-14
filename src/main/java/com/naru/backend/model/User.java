@@ -35,12 +35,6 @@ public class User {
     @ElementCollection
     private List<String> authorities;
 
-    // 오너 권한
-    List<String> ownerAuthorities = Arrays.asList("OWNER");
-
-    // 게스트 권한
-    List<String> guestAuthorities = Arrays.asList("GUEST");
-
     // 필요한 경우 추가적인 필드를 여기 추가할 수 있습니다.
     // 예: 이메일, 역할, 계정 활성화 여부 등
 }
