@@ -16,6 +16,7 @@ import com.naru.backend.dto.UserDto;
 import com.naru.backend.model.User;
 import com.naru.backend.repository.UserRepository;
 import com.naru.backend.security.JwtUtil;
+import com.naru.backend.util.TokenUtil;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -26,15 +27,19 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final MailService mailService;
+
+
     private static final List<String> ownerAuthorities = Arrays.asList("OWNER");
     private static final List<String> guestAuthorities = Arrays.asList("GUEST");
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-            AuthenticationManager authenticationManager) {
+            AuthenticationManager authenticationManager, MailService mailService, TokenUtil tokenUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
+        this.mailService = mailService;
     }
 
     @Transactional
@@ -47,6 +52,7 @@ public class UserService {
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        user.setEmailVerificationToken(TokenUtil.generateTokenWithTimestamp());
 
         // 오너 권한 설정
         if (userDto.getEmail().equals("kwonnaru@kakao.com")) {
@@ -55,7 +61,8 @@ public class UserService {
             // 게스트 권한 설정
             user.setAuthorities(guestAuthorities);
         }
-
+        
+        mailService.sendVerificationEmail(user.getEmail(), user.getEmailVerificationToken());
         return userRepository.save(user);
     }
 
@@ -72,6 +79,14 @@ public class UserService {
         return jwtUtil.generateToken(userDetails);
     }
 
-    // 추가적인 비즈니스 로직 메소드들
-
+    public boolean verifyEmail(String token) {
+        User user = userRepository.findByEmailVerificationToken(token);
+        if (user != null) {
+            user.setEmailVerified(true);
+            user.setEmailVerificationToken(null);
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
 }
