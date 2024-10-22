@@ -44,7 +44,7 @@ public class SecurityConfig {
         JwtTokenFilter jwtTokenFilter = new JwtTokenFilter(jwtUtil, userDetailsService);
 
         http.csrf(csrf -> csrf.disable())
-                .authorizeRequests(authorizeRequests -> authorizeRequests
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/auth/**").permitAll() // Spring Security 5.x
                         .anyRequest().permitAll()
                 // .requestMatchers("/**").permitAll() // for the default landing page
