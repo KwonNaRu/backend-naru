@@ -29,12 +29,11 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final MailService mailService;
 
-
     private static final List<String> ownerAuthorities = Arrays.asList("OWNER");
     private static final List<String> guestAuthorities = Arrays.asList("GUEST");
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-            AuthenticationManager authenticationManager, MailService mailService, TokenUtil tokenUtil) {
+            AuthenticationManager authenticationManager, MailService mailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
@@ -61,7 +60,7 @@ public class UserService {
             // 게스트 권한 설정
             user.setAuthorities(guestAuthorities);
         }
-        
+
         mailService.sendVerificationEmail(user.getEmail(), user.getEmailVerificationToken());
         return userRepository.save(user);
     }

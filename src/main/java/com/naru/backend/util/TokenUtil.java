@@ -3,6 +3,9 @@ package com.naru.backend.util;
 import java.time.Instant;
 import java.util.UUID;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class TokenUtil {
     public static String generateToken() {
         return UUID.randomUUID().toString();

@@ -7,7 +7,6 @@ import com.naru.backend.dto.LoginDto;
 import com.naru.backend.dto.UserDto;
 import com.naru.backend.model.User;
 import com.naru.backend.service.UserService;
-import com.naru.backend.util.TokenUtil;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -37,10 +36,6 @@ public class UserController {
 
     @GetMapping("/verify")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        if (!TokenUtil.isValidToken(token)) {
-            return ResponseEntity.badRequest().body("유효하지 않은 토큰 형식입니다.");
-        }
-
         boolean verified = userService.verifyEmail(token);
         if (verified) {
             return ResponseEntity.ok("이메일이 성공적으로 인증되었습니다.");
