@@ -14,7 +14,6 @@ import com.naru.backend.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    
     Optional<User> findByEmail(String email);
 
     // 사용자 이름으로 사용자 정보를 찾기 위한 메소드
@@ -22,8 +21,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 회원가입 메소드
     @Modifying
-    @Query("INSERT INTO User (username, email, password, authorities) VALUES (:username, :email, :password, :authorities)")
-    void saveUser (@Param("username") String username, @Param("email") String email, @Param("password") String password, @Param("authorities") List<String> authorities);
+    @Query("INSERT INTO User (username, email, password, authorities, emailVerificationToken, isEmailVerified) VALUES (:username, :email, :password, :authorities, :emailVerificationToken, :isEmailVerified)")
+    void saveUser(@Param("username") String username, @Param("email") String email, @Param("password") String password,
+            @Param("authorities") List<String> authorities,
+            @Param("emailVerificationToken") String emailVerificationToken,
+            @Param("isEmailVerified") boolean isEmailVerified);
 
     User findByEmailVerificationToken(String token);
 
