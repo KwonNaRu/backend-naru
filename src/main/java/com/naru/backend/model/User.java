@@ -1,6 +1,5 @@
 package com.naru.backend.model;
 
-import java.util.Arrays;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -23,7 +22,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
 
     private String username;
 
