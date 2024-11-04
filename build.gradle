@@ -30,7 +30,8 @@ ext {
 }
 
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	// https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt
+	implementation 'com.nimbusds:nimbus-jose-jwt:9.40'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'

@@ -1,26 +1,45 @@
 package com.naru.backend.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+
+import java.text.ParseException;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "your_secret_key"; // 비밀 키는 환경 변수나 안전한 곳에서 관리해야 합니다.
+    private static final String SECRET_KEY = "your_very_strong_secret_key_with_32_characters";
 
-    // UserDetails를 인자로 받아 JWT를 생성하는 메소드
     public String generateToken(UserDetails userDetails) {
-        return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10시간 후 만료
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-                .compact();
+        try {
+            // JWT Claims 설정
+            JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                    .subject(userDetails.getUsername())
+                    .issueTime(new Date())
+                    .expirationTime(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10시간
+                    .build();
+
+            // 서명 알고리즘 및 서명 키 설정
+            SignedJWT signedJWT = new SignedJWT(
+                    new JWSHeader(JWSAlgorithm.HS256),
+                    claimsSet);
+
+            signedJWT.sign(new MACSigner(SECRET_KEY.getBytes()));
+
+            // JWT를 직렬화하여 토큰 생성
+            return signedJWT.serialize();
+
+        } catch (JOSEException e) {
+            throw new RuntimeException("토큰 생성 중 오류 발생", e);
+        }
     }
 
     // JWT에서 사용자 이름을 추출하는 메소드
@@ -36,14 +55,19 @@ public class JwtUtil {
 
     // JWT의 만료 여부를 확인하는 메소드
     private boolean isTokenExpired(String token) {
-        return getClaims(token).getExpiration().before(new Date());
+        return getClaims(token).getExpirationTime().before(new Date());
     }
 
-    // JWT에서 Claims를 추출하는 메소드
-    private Claims getClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody();
+    public JWTClaimsSet getClaims(String token) {
+        try {
+            // JWT 토큰 파싱
+            SignedJWT signedJWT = SignedJWT.parse(token);
+
+            // 서명이 유효한지 검증하고, 유효하면 클레임 반환
+            return signedJWT.getJWTClaimsSet();
+
+        } catch (ParseException e) {
+            throw new RuntimeException("토큰을 파싱하는 중 오류 발생", e);
+        }
     }
 }
