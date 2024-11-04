@@ -14,7 +14,8 @@ import com.naru.backend.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByEmail(String email);
+    @Query("SELECT u FROM User u WHERE u.email = :email")
+    Optional<User> findByEmail(@Param("email") String email);
 
     // 사용자 이름으로 사용자 정보를 찾기 위한 메소드
     Optional<User> findByUsername(String email);
