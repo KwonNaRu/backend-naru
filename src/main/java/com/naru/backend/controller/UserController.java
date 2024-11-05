@@ -1,5 +1,6 @@
 package com.naru.backend.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,6 +9,7 @@ import com.naru.backend.dto.UserDto;
 import com.naru.backend.model.User;
 import com.naru.backend.service.UserService;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @RestController
@@ -26,11 +28,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<?> loginUser(@RequestBody LoginDto loginDto) {
         try {
             return ResponseEntity.ok(userService.authenticateUser(loginDto));
-        } catch (UsernameNotFoundException e) {
-            throw new RuntimeException("Invalid username or password");
+        } catch (UsernameNotFoundException | BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("로그인 처리 중 오류가 발생했습니다.");
         }
     }
 
