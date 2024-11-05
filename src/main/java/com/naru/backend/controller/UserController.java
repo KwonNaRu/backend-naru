@@ -42,8 +42,8 @@ public class UserController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        boolean verified = userService.verifyEmail(token);
+    public ResponseEntity<String> verifyEmail(@RequestParam String token, @RequestParam String email) {
+        boolean verified = userService.verifyEmail(email, token);
         if (verified) {
             return ResponseEntity.ok("이메일이 성공적으로 인증되었습니다.");
         } else {

@@ -2,6 +2,7 @@ package com.naru.backend.service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -89,14 +90,22 @@ public class UserService {
         }
     }
 
-    public boolean verifyEmail(String token) {
-        User user = userRepository.findByEmailVerificationToken(token);
-        if (user != null) {
-            user.setEmailVerified(true);
-            user.setEmailVerificationToken(null);
-            userRepository.save(user);
-            return true;
+    public boolean verifyEmail(String email, String token) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // Assuming you also want to check if the token matches before verifying the
+            // email
+            if (token.equals(user.getEmailVerificationToken())) {
+                user.setEmailVerified(true);
+                user.setEmailVerificationToken(null);
+                userRepository.save(user);
+                return true;
+            }
         }
+
         return false;
     }
 }

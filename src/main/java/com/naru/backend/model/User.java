@@ -24,18 +24,22 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
+    @Column(nullable = false)
     private String username;
 
+    @Column(nullable = false)
     private String password;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
     @ElementCollection
     private List<String> authorities;
 
+    @Column(nullable = true)
     private String emailVerificationToken;
 
+    @Column(nullable = false)
     private boolean isEmailVerified = false;
 
     // 필요한 경우 추가적인 필드를 여기 추가할 수 있습니다.

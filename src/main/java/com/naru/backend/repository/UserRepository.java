@@ -28,6 +28,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("emailVerificationToken") String emailVerificationToken,
             @Param("isEmailVerified") boolean isEmailVerified);
 
-    User findByEmailVerificationToken(String token);
-
 }

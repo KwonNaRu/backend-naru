@@ -15,7 +15,7 @@ public class MailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject("Naru 블로그 회원가입 인증 메일");
-        message.setText("인증 링크: http://localhost:8080/verify?token=" + token);
+        message.setText("인증 링크: http://localhost:8080/auth/verify?token=" + token + "&email=" + to);
         mailSender.send(message);
     }
 }
