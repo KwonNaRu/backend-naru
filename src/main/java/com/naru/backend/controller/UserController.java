@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.naru.backend.dto.LoginDto;
 import com.naru.backend.dto.UserDto;
+import com.naru.backend.exception.EmailNotVerifiedException;
 import com.naru.backend.model.User;
 import com.naru.backend.service.UserService;
 
@@ -33,6 +34,8 @@ public class UserController {
             return ResponseEntity.ok(userService.authenticateUser(loginDto));
         } catch (UsernameNotFoundException | BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        } catch (EmailNotVerifiedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("로그인 처리 중 오류가 발생했습니다.");
         }

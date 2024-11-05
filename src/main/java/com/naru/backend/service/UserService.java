@@ -4,18 +4,19 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.naru.backend.dto.LoginDto;
 import com.naru.backend.dto.UserDto;
+import com.naru.backend.exception.EmailNotVerifiedException;
 import com.naru.backend.model.User;
 import com.naru.backend.repository.UserRepository;
 import com.naru.backend.security.JwtUtil;
+import com.naru.backend.security.UserPrincipal;
 import com.naru.backend.util.TokenUtil;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -72,10 +73,20 @@ public class UserService {
     }
 
     public String authenticateUser(LoginDto loginDto) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return jwtUtil.generateToken(userDetails);
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
+            UserPrincipal userDetails = (UserPrincipal) authentication.getPrincipal();
+            User user = userRepository.findByEmail(userDetails.getEmail())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+            if (!user.isEmailVerified()) {
+                throw new EmailNotVerifiedException("Email not verified");
+            }
+            return jwtUtil.generateToken(userDetails);
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("Wrong password");
+        }
     }
 
     public boolean verifyEmail(String token) {
