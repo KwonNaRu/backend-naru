@@ -46,11 +46,12 @@ public class UserPrincipal implements UserDetails {
     }
 
     public String getRole() {
-        if (authorities.contains("OWNER")) {
-            return "OWNER";
-        } else {
-            return "GUEST";
+        for (GrantedAuthority authority : authorities) {
+            if (authority.getAuthority().equals("OWNER")) {
+                return "OWNER";
+            }
         }
+        return "GUEST";
     }
 
     @Override

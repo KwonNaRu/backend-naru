@@ -18,11 +18,13 @@ public class JwtUtil {
 
     private static final String SECRET_KEY = "your_very_strong_secret_key_with_32_characters";
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserPrincipal userDetails) {
         try {
             // JWT Claims 설정
             JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                    .subject(userDetails.getUsername())
+                    .subject(userDetails.getEmail())
+                    .claim("username", userDetails.getUsername())
+                    .claim("role", userDetails.getRole())
                     .issueTime(new Date())
                     .expirationTime(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10시간
                     .build();
@@ -47,10 +49,18 @@ public class JwtUtil {
         return getClaims(token).getSubject();
     }
 
+    public String extractEmail(String token) {
+        try {
+            return getClaims(token).getStringClaim("email");
+        } catch (ParseException e) {
+            throw new RuntimeException("토큰 파싱 중 오류 발생", e);
+        }
+    }
+
     // JWT의 유효성을 확인하는 메소드
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+    public boolean isTokenValid(String token, UserPrincipal userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        return (username.equals(userDetails.getEmail()) && !isTokenExpired(token));
     }
 
     // JWT의 만료 여부를 확인하는 메소드

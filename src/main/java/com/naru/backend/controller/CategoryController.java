@@ -3,6 +3,7 @@ package com.naru.backend.controller;
 import com.naru.backend.model.Category;
 import com.naru.backend.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class CategoryController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('OWNER')")
     public Category createCategory(@RequestBody Category category) {
         return categoryService.createCategory(category);
     }
