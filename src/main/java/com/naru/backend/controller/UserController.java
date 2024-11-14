@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.naru.backend.dto.LoginDto;
 import com.naru.backend.dto.UserDto;
 import com.naru.backend.exception.EmailNotVerifiedException;
+import com.naru.backend.model.Login;
 import com.naru.backend.model.User;
 import com.naru.backend.service.UserService;
 
@@ -24,14 +24,14 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody UserDto userDto) {
-        return ResponseEntity.ok(userService.registerUser(userDto));
+    public ResponseEntity<UserDto> registerUser(@RequestBody User user) {
+        return ResponseEntity.ok(userService.registerUser(user));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<?> loginUser(@RequestBody Login login) {
         try {
-            return ResponseEntity.ok(userService.authenticateUser(loginDto));
+            return ResponseEntity.ok(userService.authenticateUser(login));
         } catch (UsernameNotFoundException | BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         } catch (EmailNotVerifiedException e) {
