@@ -1,12 +1,10 @@
-package com.naru.backend.model;
+package com.naru.backend.dto;
 
-import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
-@Entity
 @Data
-public class Login {
+public class LoginDTO {
     @NotEmpty
     private String email;
 

@@ -12,9 +12,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.naru.backend.dto.UserDto;
+import com.naru.backend.dto.LoginDTO;
+import com.naru.backend.dto.UserRequestDTO;
+import com.naru.backend.dto.UserResponseDTO;
 import com.naru.backend.exception.EmailNotVerifiedException;
-import com.naru.backend.model.Login;
 import com.naru.backend.model.User;
 import com.naru.backend.repository.UserRepository;
 import com.naru.backend.security.JwtUtil;
@@ -45,27 +46,27 @@ public class UserService {
     }
 
     @Transactional
-    public UserDto registerUser(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+    public UserResponseDTO registerUser(UserRequestDTO userRequestDTO) {
+        if (userRepository.findByEmail(userRequestDTO.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
 
-        User newUser = new User();
-        newUser.setUsername(user.getUsername());
-        newUser.setEmail(user.getEmail());
-        newUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        newUser.setEmailVerificationToken(TokenUtil.generateTokenWithTimestamp());
+        User user = new User();
+        user.setUsername(userRequestDTO.getUsername());
+        user.setEmail(userRequestDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
+        user.setEmailVerificationToken(TokenUtil.generateTokenWithTimestamp());
 
         // 오너 권한 설정
-        if (user.getEmail().equals("kwonnaru@kakao.com")) {
-            newUser.setAuthorities(ownerAuthorities);
+        if (userRequestDTO.getEmail().equals("kwonnaru@kakao.com")) {
+            user.setAuthorities(ownerAuthorities);
         } else {
             // 게스트 권한 설정
-            newUser.setAuthorities(guestAuthorities);
+            user.setAuthorities(guestAuthorities);
         }
 
-        mailService.sendVerificationEmail(newUser.getEmail(), newUser.getEmailVerificationToken());
-        return new UserDto(userRepository.save(newUser));
+        mailService.sendVerificationEmail(user.getEmail(), user.getEmailVerificationToken());
+        return new UserResponseDTO(userRepository.save(user));
     }
 
     @Transactional
@@ -74,10 +75,10 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
-    public String authenticateUser(Login login) {
+    public String authenticateUser(LoginDTO loginDTO) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(login.getEmail(), login.getPassword()));
+                    new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
             UserPrincipal userDetails = (UserPrincipal) authentication.getPrincipal();
             User user = userRepository.findByEmail(userDetails.getEmail())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
