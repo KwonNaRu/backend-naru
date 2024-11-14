@@ -23,8 +23,8 @@ public class CategoryController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('OWNER')")
-    public CategoryDto createCategory(@RequestBody Category category) {
-        return categoryService.createCategory(category);
+    public CategoryDto createCategory(@RequestBody CategoryDto categoryDto) {
+        return categoryService.createCategory(categoryDto);
     }
 
     @DeleteMapping("/{id}")

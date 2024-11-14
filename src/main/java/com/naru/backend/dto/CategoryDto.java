@@ -12,16 +12,13 @@ public class CategoryDto {
 
     private Long id;
     private String name;
-    private UserDto user; // User의 ID만 반환
+    private UserResponseDTO user;
     private List<Post> posts;
 
     public CategoryDto(Category category) {
         this.id = category.getId();
         this.name = category.getName();
-        this.user = new UserDto(
-                category.getUser().getUserId(),
-                category.getUser().getUsername(),
-                category.getUser().getEmail());
+        this.user = new UserResponseDTO(category.getUser());
         this.posts = category.getPosts();
     }
 }
