@@ -1,5 +1,6 @@
 package com.naru.backend.controller;
 
+import com.naru.backend.dto.CategoryDto;
 import com.naru.backend.model.Category;
 import com.naru.backend.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +17,13 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping
-    public List<Category> getAllCategories() {
+    public List<CategoryDto> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('OWNER')")
-    public Category createCategory(@RequestBody Category category) {
+    public CategoryDto createCategory(@RequestBody Category category) {
         return categoryService.createCategory(category);
     }
 

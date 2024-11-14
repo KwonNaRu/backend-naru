@@ -1,5 +1,6 @@
 package com.naru.backend.service;
 
+import com.naru.backend.dto.CategoryDto;
 import com.naru.backend.model.Category;
 import com.naru.backend.model.User;
 import com.naru.backend.repository.CategoryRepository;
@@ -23,11 +24,12 @@ public class CategoryService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public List<CategoryDto> getAllCategories() {
+        return categoryRepository.findAll().stream()
+                .map(CategoryDto::new).toList();
     }
 
-    public Category createCategory(Category category) {
+    public CategoryDto createCategory(Category category) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()) {
@@ -41,7 +43,7 @@ public class CategoryService {
             // Category 엔티티에 User 설정
             category.setUser(user);
         }
-        return categoryRepository.save(category);
+        return new CategoryDto(categoryRepository.save(category));
     }
 
     public void deleteCategory(Long id) {
