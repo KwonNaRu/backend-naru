@@ -23,14 +23,14 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user; // 작성자 ID (User 엔티티와의 관계)
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String title; // 제목
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = true, columnDefinition = "TEXT")
     private String content; // 내용
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id", nullable = true)
     private Category category; // 카테고리
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
