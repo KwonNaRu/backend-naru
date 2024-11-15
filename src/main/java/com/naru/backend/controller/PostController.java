@@ -1,5 +1,6 @@
 package com.naru.backend.controller;
 
+import com.naru.backend.dto.PostDTO;
 import com.naru.backend.model.Post;
 import com.naru.backend.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,8 @@ public class PostController {
 
     // 글 생성
     @PostMapping
-    public Post createPost(@RequestBody Post post) {
-        return postService.createPost(post);
+    public PostDTO createPost() {
+        return postService.createPost();
     }
 
     // 특정 글 조회
