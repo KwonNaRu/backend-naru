@@ -17,7 +17,7 @@ public class PostController {
 
     // 모든 글 조회
     @GetMapping
-    public List<Post> getAllPosts() {
+    public List<PostDTO> getAllPosts() {
         return postService.getAllPosts();
     }
 

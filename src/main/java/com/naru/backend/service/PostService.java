@@ -24,8 +24,8 @@ public class PostService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
+    public List<PostDTO> getAllPosts() {
+        return postRepository.findAll().stream().map(PostDTO::new).toList();
     }
 
     public PostDTO createPost() {
