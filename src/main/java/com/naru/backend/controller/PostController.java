@@ -33,12 +33,6 @@ public class PostController {
         return postService.getPostById(id); // Post 엔티티에 댓글이 포함되어 반환됨
     }
 
-    // 글 수정
-    @PutMapping("/{id}")
-    public Post updatePost(@PathVariable Long id, @RequestBody Post post) {
-        return postService.updatePost(id, post);
-    }
-
     // 글 삭제
     @DeleteMapping("/{id}")
     public void deletePost(@PathVariable Long id) {

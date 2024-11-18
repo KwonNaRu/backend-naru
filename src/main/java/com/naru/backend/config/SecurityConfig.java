@@ -47,7 +47,9 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/auth/**").permitAll() // Spring Security 5.x
+                        .requestMatchers("/**").permitAll()
                         .anyRequest().permitAll()
                 // .requestMatchers("/**").permitAll() // for the default landing page
                 )

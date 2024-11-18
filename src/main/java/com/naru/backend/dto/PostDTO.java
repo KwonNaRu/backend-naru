@@ -3,8 +3,10 @@ package com.naru.backend.dto;
 import com.naru.backend.model.Post;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class PostDTO {
     private Long postId;
     private String author; // 작성자 ID (User 엔티티와의 관계)
