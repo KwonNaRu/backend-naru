@@ -2,8 +2,10 @@ package com.naru.backend.service;
 
 import com.naru.backend.dto.CategoryDto;
 import com.naru.backend.model.Category;
+import com.naru.backend.model.Post;
 import com.naru.backend.model.User;
 import com.naru.backend.repository.CategoryRepository;
+import com.naru.backend.repository.PostRepository;
 import com.naru.backend.repository.UserRepository;
 import com.naru.backend.security.UserPrincipal;
 
@@ -13,7 +15,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -24,9 +29,30 @@ public class CategoryService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PostRepository postRepository;
+
     public List<CategoryDto> getAllCategories() {
-        return categoryRepository.findAll().stream()
-                .map(CategoryDto::new).toList();
+        // 1. 모든 카테고리 조회
+        List<Category> categories = categoryRepository.findAll();
+
+        // 2. 모든 카테고리 ID 추출
+        List<Long> categoryIds = categories.stream()
+                .map(Category::getId)
+                .toList();
+
+        // 3. 한 번의 쿼리로 모든 포스트 조회
+        Map<Long, List<Post>> postsByCategory = postRepository.findByCategoryIdIn(categoryIds)
+                .stream()
+                .collect(Collectors.groupingBy(Post::getCategoryId));
+
+        // 4. CategoryDto 생성 시 매핑된 포스트 할당
+        return categories.stream()
+                .map(category -> {
+                    CategoryDto dto = new CategoryDto(category);
+                    dto.setPosts(postsByCategory.getOrDefault(category.getId(), Collections.emptyList()));
+                    return dto;
+                }).toList();
     }
 
     public CategoryDto createCategory(CategoryDto categoryDto) {

@@ -25,7 +25,6 @@ public class Category {
     @JoinColumn(name = "user_id", nullable = false)
     private User user; // 작성자 ID (User 엔티티와의 관계)
 
-    // @OneToMany(mappedBy = "category", cascade = { CascadeType.PERSIST,
-    // CascadeType.MERGE }, fetch = FetchType.LAZY)
-    // private List<Post> posts;
+    @Transient // JPA 영속성 제외
+    private List<Post> posts;
 }
