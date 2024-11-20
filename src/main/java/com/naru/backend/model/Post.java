@@ -1,54 +1,38 @@
 package com.naru.backend.model;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "posts")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "posts")
 public class Post {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long postId; // 글 ID
+    private String id;
+    private Long authorId;
+    private String author;
+    private String title;
+    private String content;
+    private Long categoryId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private List<Comment> comments; // 댓글을 포함
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user; // 작성자 ID (User 엔티티와의 관계)
-
-    @Column(nullable = true)
-    private String title; // 제목
-
-    @Column(nullable = true, columnDefinition = "TEXT")
-    private String content; // 내용
-
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = true)
-    private Category category; // 카테고리
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Comment> comments; // 댓글 리스트
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt; // 생성일
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt; // 수정일
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+    @Data
+    @NoArgsConstructor
+    public static class Comment {
+        private String id;
+        private Long authorId;
+        private String author;
+        private String content;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+        private List<Comment> replies; // 대댓글
     }
 }

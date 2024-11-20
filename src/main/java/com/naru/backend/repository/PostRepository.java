@@ -1,7 +1,17 @@
 package com.naru.backend.repository;
 
 import com.naru.backend.model.Post;
-import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PostRepository extends JpaRepository<Post, Long> {
+import java.util.List;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface PostRepository extends MongoRepository<Post, String> {
+    List<Post> findByAuthorId(Long authorId);
+
+    List<Post> findByCategoryId(Long categoryId);
+
+    void deleteByAuthorId(Long authorId);
 }

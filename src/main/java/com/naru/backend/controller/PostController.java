@@ -29,13 +29,13 @@ public class PostController {
 
     // 특정 글 조회
     @GetMapping("/{id}")
-    public Post getPostById(@PathVariable Long id) {
+    public Post getPostById(@PathVariable String id) {
         return postService.getPostById(id); // Post 엔티티에 댓글이 포함되어 반환됨
     }
 
     // 글 삭제
     @DeleteMapping("/{id}")
-    public void deletePost(@PathVariable Long id) {
+    public void deletePost(@PathVariable String id) {
         postService.deletePost(id);
     }
 }
