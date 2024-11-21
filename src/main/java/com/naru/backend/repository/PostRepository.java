@@ -16,4 +16,6 @@ public interface PostRepository extends MongoRepository<Post, String> {
     void deleteByAuthorId(Long authorId);
 
     List<Post> findByCategoryIdIn(List<Long> categoryIds);
+
+    List<Post> findByCategoryIdIsNull();
 }

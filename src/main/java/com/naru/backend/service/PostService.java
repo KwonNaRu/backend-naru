@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.naru.backend.dto.PostDTO;
 import com.naru.backend.model.Post;
 import com.naru.backend.model.User;
-import com.naru.backend.repository.CategoryRepository;
 import com.naru.backend.repository.PostRepository;
 import com.naru.backend.repository.UserRepository;
 import com.naru.backend.security.UserPrincipal;
@@ -28,11 +27,10 @@ public class PostService {
     private SecurityUtil securityUtil;
 
     public List<PostDTO> getAllPosts() {
-        return postRepository.findAll().stream().map(PostDTO::new).toList();
+        return postRepository.findByCategoryIdIsNull().stream().map(PostDTO::new).toList();
     }
 
     public PostDTO createPost() {
-
         User user = securityUtil.getAuthenticatedUser();
 
         Post post = new Post();
