@@ -25,7 +25,7 @@ public class WebSocketController {
     public void updatePost(Principal principal, @RequestBody PostDTO postDTO) {
         UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) principal;
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        PostDTO savedPost = postService.updatePost(userPrincipal, postDTO.getPostId(), postDTO);
+        PostDTO savedPost = postService.updatePost(userPrincipal, postDTO.getId(), postDTO);
         messagingTemplate.convertAndSend("/topic/posts", savedPost);
     }
 }
