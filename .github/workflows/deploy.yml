@@ -20,4 +20,4 @@ jobs:
 
     - name: Run docker-compose on Oracle instance
       run: |
-        ssh -o StrictHostKeyChecking=no opc@144.24.94.9 "cd ~/workspace/backend-naru && docker-compose up --build -d"
+        ssh -o StrictHostKeyChecking=no opc@144.24.94.9 "cd ~/workspace/backend-naru && docker-compose up -f docker-compose.prod --build -d"
