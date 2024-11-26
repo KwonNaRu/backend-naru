@@ -1,6 +1,6 @@
 services:
     app:
-        image: naru-backend
+        image: dmdmdm1322/naru-backend
         container_name: naru-backend
         build:
             context: .

@@ -86,3 +86,10 @@ docker-compose up --build -d
 ```bash
 docker-compose down
 ```
+
+### docker prod 이미지 빌드/푸시
+
+```bash
+docker build --no-cache -f Dockerfile.prod -t dmdmdm1322/naru-backend-prod:latest .
+docker push dmdmdm1322/naru-backend-prod:latest
+```

@@ -1,14 +1,14 @@
 services:
     app:
-        image: naru-backend
+        image: dmdmdm1322/naru-backend-prod
         container_name: naru-backend
-        build:
-            context: .
-            dockerfile: Dockerfile.prod
+        # build:
+        #     context: .
+        #     dockerfile: Dockerfile.prod
         ports:
             - "8080:8080"
-        environment:
-            SPRING_PROFILES_ACTIVE: prod
+        # environment:
+        #     SPRING_PROFILES_ACTIVE: prod
         networks:
             - naru-net
 
