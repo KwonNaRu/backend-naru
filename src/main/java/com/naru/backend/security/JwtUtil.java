@@ -80,4 +80,24 @@ public class JwtUtil {
             throw new RuntimeException("토큰을 파싱하는 중 오류 발생", e);
         }
     }
+
+    public String generateRefreshToken(UserPrincipal userDetails) {
+        try {
+            JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                    .subject(userDetails.getEmail())
+                    .issueTime(new Date())
+                    .expirationTime(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 7일
+                    .build();
+
+            SignedJWT signedJWT = new SignedJWT(
+                    new JWSHeader(JWSAlgorithm.HS256),
+                    claimsSet);
+
+            signedJWT.sign(new MACSigner(SECRET_KEY.getBytes()));
+            return signedJWT.serialize();
+
+        } catch (JOSEException e) {
+            throw new RuntimeException("리프레시 토큰 생성 중 오류 발생", e);
+        }
+    }
 }

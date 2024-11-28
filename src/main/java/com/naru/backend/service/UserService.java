@@ -1,7 +1,9 @@
 package com.naru.backend.service;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +24,7 @@ import com.naru.backend.security.JwtUtil;
 import com.naru.backend.security.UserPrincipal;
 import com.naru.backend.util.TokenUtil;
 
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Service
@@ -32,17 +35,22 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final MailService mailService;
+    private final TokenService tokenService;
+    private final UserDetailsService userDetailsService;
 
     private static final List<String> ownerAuthorities = Arrays.asList("OWNER");
     private static final List<String> guestAuthorities = Arrays.asList("GUEST");
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-            AuthenticationManager authenticationManager, MailService mailService) {
+            AuthenticationManager authenticationManager, MailService mailService, TokenService tokenService,
+            UserDetailsService userDetailsService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
         this.mailService = mailService;
+        this.tokenService = tokenService;
+        this.userDetailsService = userDetailsService;
     }
 
     @Transactional
@@ -75,7 +83,7 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
-    public String authenticateUser(LoginDTO loginDTO) {
+    public Map<String, String> authenticateUser(LoginDTO loginDTO) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
@@ -86,7 +94,20 @@ public class UserService {
             if (!user.isEmailVerified()) {
                 throw new EmailNotVerifiedException("Email not verified");
             }
-            return jwtUtil.generateToken(userDetails);
+
+            UserPrincipal userPrincipal = UserPrincipal.create(user);
+            String accessToken = jwtUtil.generateToken(userPrincipal);
+            String refreshToken = jwtUtil.generateRefreshToken(userPrincipal);
+
+            // Redis에 토큰 저장
+            tokenService.saveAccessToken(user.getEmail(), accessToken);
+            tokenService.saveRefreshToken(user.getEmail(), refreshToken);
+
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("accessToken", accessToken);
+            tokens.put("refreshToken", refreshToken);
+
+            return tokens;
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Wrong password");
         }
@@ -109,5 +130,22 @@ public class UserService {
         }
 
         return false;
+    }
+
+    public Map<String, String> refreshAccessToken(String refreshToken) {
+        String email = jwtUtil.extractUsername(refreshToken);
+
+        if (tokenService.validateRefreshToken(email, refreshToken)) {
+            UserPrincipal userPrincipal = (UserPrincipal) userDetailsService.loadUserByUsername(email);
+            String newAccessToken = jwtUtil.generateToken(userPrincipal);
+
+            tokenService.saveAccessToken(email, newAccessToken);
+
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("accessToken", newAccessToken);
+            return tokens;
+        }
+
+        throw new RuntimeException("Invalid refresh token");
     }
 }
