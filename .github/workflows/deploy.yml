@@ -29,6 +29,10 @@ jobs:
                   ssh -o StrictHostKeyChecking=no opc@144.24.94.9 "curl -o ~/application-prod.yml http://localhost:8888/naru/config-prod"
                   scp -o StrictHostKeyChecking=no opc@144.24.94.9:~/application-prod.yml ./src/main/resources/application-prod.yml
 
+            - name: Verify downloaded configuration file
+              run: |
+                  cat ./src/main/resources/application-prod.yml
+
             - name: Log in to Docker Hub
               uses: docker/login-action@v2
               with:
