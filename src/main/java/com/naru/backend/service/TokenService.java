@@ -29,6 +29,11 @@ public class TokenService {
         return redisTemplate.opsForValue().get(key);
     }
 
+    public String getAccessToken(String email) {
+        String key = "access_token:" + email;
+        return redisTemplate.opsForValue().get(key);
+    }
+
     public void deleteTokens(String email) {
         redisTemplate.delete("refresh_token:" + email);
         redisTemplate.delete("access_token:" + email);

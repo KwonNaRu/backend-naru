@@ -5,6 +5,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.naru.backend.service.TokenService;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -17,10 +19,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final TokenService tokenService;
 
-    public JwtTokenFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+    public JwtTokenFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, TokenService tokenService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
+        this.tokenService = tokenService;
     }
 
     @Override
@@ -39,24 +43,23 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
         }
 
-        String username = null;
         if (jwtToken != null) {
             try {
-                username = jwtUtil.extractUsername(jwtToken);
+                String email = jwtUtil.extractUsername(jwtToken);
+
+                // Redis에 저장된 토큰과 비교
+                String storedToken = tokenService.getAccessToken(email);
+                if (storedToken != null && storedToken.equals(jwtToken)) {
+                    UserPrincipal userDetails = (UserPrincipal) userDetailsService.loadUserByUsername(email);
+
+                    if (jwtUtil.isTokenValid(jwtToken, userDetails)) {
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
+                }
             } catch (Exception e) {
-                // 예외 처리: 토큰이 유효하지 않거나 만료된 경우
                 System.out.println("Invalid JWT Token");
-            }
-        }
-
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserPrincipal userDetails = (UserPrincipal) userDetailsService.loadUserByUsername(username);
-
-            if (jwtUtil.isTokenValid(jwtToken, userDetails)) {
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(userDetails);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
 
