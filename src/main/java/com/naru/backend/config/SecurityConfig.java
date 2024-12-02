@@ -15,8 +15,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.naru.backend.security.JwtTokenFilter;
-import com.naru.backend.security.JwtUtil;
 import com.naru.backend.service.TokenService;
+import com.naru.backend.util.JwtUtil;
 
 @Configuration
 @EnableWebSecurity

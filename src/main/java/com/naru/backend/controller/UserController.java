@@ -1,10 +1,12 @@
 package com.naru.backend.controller;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,8 +19,16 @@ import com.naru.backend.dto.LoginDTO;
 import com.naru.backend.dto.UserRequestDTO;
 import com.naru.backend.dto.UserResponseDTO;
 import com.naru.backend.exception.EmailNotVerifiedException;
+import com.naru.backend.model.User;
+import com.naru.backend.security.UserPrincipal;
 import com.naru.backend.service.TokenService;
 import com.naru.backend.service.UserService;
+import com.naru.backend.util.CookieUtil;
+import com.naru.backend.util.JwtUtil;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/auth")
@@ -26,10 +36,17 @@ public class UserController {
 
     private final UserService userService;
     private final TokenService tokenService;
+    private final CookieUtil cookieUtil;
+    private final JwtUtil jwtUtil;
+    private final UserDetailsService userDetailsService;
 
-    public UserController(UserService userService, TokenService tokenService) {
+    public UserController(UserService userService, TokenService tokenService, CookieUtil cookieUtil, JwtUtil jwtUtil,
+            UserDetailsService userDetailsService) {
         this.userService = userService;
         this.tokenService = tokenService;
+        this.cookieUtil = cookieUtil;
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
     }
 
     @PostMapping("/register")
@@ -38,9 +55,18 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<?> loginUser(@RequestBody LoginDTO loginDTO, HttpServletResponse response) {
         try {
-            return ResponseEntity.ok(userService.authenticateUser(loginDTO));
+
+            // 사용자 인증 및 JWT 생성
+            User user = userService.authenticateUser(loginDTO);
+            Map<String, String> tokens = userService.generateTokens(user);
+            cookieUtil.addTokenCookies(response, tokens);
+
+            UserResponseDTO userResponse = new UserResponseDTO(user);
+
+            // 사용자 정보와 refreshToken을 응답으로 반환
+            return ResponseEntity.ok(userResponse);
         } catch (UsernameNotFoundException | BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         } catch (EmailNotVerifiedException e) {
@@ -61,12 +87,61 @@ public class UserController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestParam String refreshToken) {
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         try {
+
+            String refreshToken = Arrays.stream(request.getCookies())
+                    .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                    .findFirst()
+                    .map(Cookie::getValue)
+                    .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+
+            String email = jwtUtil.extractUsername(refreshToken);
+
+            // refreshToken 검증 및 새로운 accessToken 발급
             Map<String, String> tokens = userService.refreshAccessToken(refreshToken);
-            return ResponseEntity.ok(tokens);
+            cookieUtil.addTokenCookies(response, tokens);
+
+            UserResponseDTO userResponse = userService.convertToUserResponseDTO(email);
+
+            return ResponseEntity.ok(userResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+        }
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<?> checkTokenStatus(HttpServletRequest request) {
+        try {
+            String accessToken = Arrays.stream(request.getCookies())
+                    .filter(cookie -> "NID_AUTH".equals(cookie.getName()))
+                    .findFirst()
+                    .map(Cookie::getValue)
+                    .orElseThrow(() -> new RuntimeException("Access token not found"));
+
+            // Refresh Token 추출
+            String refreshToken = Arrays.stream(request.getCookies())
+                    .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                    .findFirst()
+                    .map(Cookie::getValue)
+                    .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+
+            String email = jwtUtil.extractUsername(accessToken);
+
+            // Redis에 저장된 토큰과 비교
+            String storedToken = tokenService.getAccessToken(email);
+            String storedRefreshToken = tokenService.getRefreshToken(email);
+            UserPrincipal userDetails = (UserPrincipal) userDetailsService.loadUserByUsername(email);
+            if (storedToken.equals(accessToken) && storedRefreshToken.equals(refreshToken)
+                    && jwtUtil.isTokenValid(accessToken, userDetails)
+                    && jwtUtil.isTokenValid(storedRefreshToken, userDetails)) {
+                UserResponseDTO userResponse = userService.convertToUserResponseDTO(email);
+                return ResponseEntity.ok(userResponse);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access token is expired or invalid");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid access token");
         }
     }
 

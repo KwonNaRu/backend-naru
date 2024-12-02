@@ -1,17 +1,17 @@
-package com.naru.backend.security;
+package com.naru.backend.util;
 
-import org.springframework.security.core.userdetails.UserDetails;
+import java.text.ParseException;
+import java.util.Date;
+
 import org.springframework.stereotype.Component;
 
+import com.naru.backend.security.UserPrincipal;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-
-import java.text.ParseException;
-import java.util.Date;
 
 @Component
 public class JwtUtil {

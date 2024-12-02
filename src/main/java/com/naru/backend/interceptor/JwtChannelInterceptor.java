@@ -10,8 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
-import com.naru.backend.security.JwtUtil;
 import com.naru.backend.security.UserPrincipal;
+import com.naru.backend.util.JwtUtil;
 
 @Component
 public class JwtChannelInterceptor implements ChannelInterceptor {
