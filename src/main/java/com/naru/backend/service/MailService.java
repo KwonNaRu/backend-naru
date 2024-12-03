@@ -12,7 +12,7 @@ public class MailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    @Value("${app.base-ur}")
+    @Value("${app.base-url}")
     private String baseUrl;
 
     public void sendVerificationEmail(String to, String token) {
