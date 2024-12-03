@@ -3,6 +3,7 @@ package com.naru.backend.util;
 import java.text.ParseException;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.naru.backend.security.UserPrincipal;
@@ -16,7 +17,8 @@ import com.nimbusds.jwt.SignedJWT;
 @Component
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "your_very_strong_secret_key_with_32_characters";
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
 
     public String generateToken(UserPrincipal userDetails) {
         try {
