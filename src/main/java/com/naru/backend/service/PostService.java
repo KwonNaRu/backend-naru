@@ -1,7 +1,7 @@
 package com.naru.backend.service;
 
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -34,9 +34,6 @@ public class PostService {
     @Autowired
     private SecurityUtil securityUtil;
 
-    private Map<String, ScheduledFuture<?>> debounceTasks = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
     public List<PostDTO> getAllPosts() {
         return postRepository.findByCategoryIdIsNull().stream().map(PostDTO::new).toList();
     }
@@ -55,25 +52,52 @@ public class PostService {
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
     }
 
-    public PostDTO updatePostWithDebounce(UserPrincipal userPrincipal, String id, PostDTO postDTO) {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ConcurrentHashMap<String, PostDTO> lastRequests = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, CompletableFuture<PostDTO>> debounceResults = new ConcurrentHashMap<>();
+
+    public synchronized PostDTO debounceUpdate(String id, PostDTO postDTO, UserPrincipal userPrincipal) {
+        // 마지막 요청 저장 (항상 덮어쓰기)
+        lastRequests.put(id, postDTO);
+
         // 이전 예약된 작업이 있다면 취소
-        ScheduledFuture<?> existingTask = debounceTasks.get(id);
+        ScheduledFuture<?> existingTask = scheduler.schedule(() -> {
+        }, 0, TimeUnit.SECONDS);
         if (existingTask != null) {
             existingTask.cancel(false);
         }
 
-        // 2초 후에 실행될 새로운 작업 예약
-        ScheduledFuture<?> newTask = scheduler.schedule(() -> {
+        // 새로운 요청에 대한 CompletableFuture를 생성하고 저장
+        CompletableFuture<PostDTO> future = new CompletableFuture<>();
+        debounceResults.put(id, future);
+
+        // 2초 후 마지막 요청을 처리하는 작업 예약
+        scheduler.schedule(() -> {
             try {
-                updatePost(userPrincipal, id, postDTO);
-                debounceTasks.remove(id);
+                // 마지막 요청을 가져와 처리
+                PostDTO lastPostDTO = lastRequests.get(id);
+                CompletableFuture<PostDTO> lastFuture = debounceResults.get(id);
+
+                if (lastPostDTO != null && lastFuture != null) {
+                    // updatePost 실행
+                    PostDTO updatedPost = updatePost(id, lastPostDTO, userPrincipal);
+                    // 마지막 요청의 future에 결과 반환
+                    lastFuture.complete(updatedPost);
+                }
             } catch (Exception e) {
-                throw new RuntimeException("Failed to update post: " + e.getMessage());
+                CompletableFuture<PostDTO> lastFuture = debounceResults.get(id);
+                if (lastFuture != null) {
+                    lastFuture.completeExceptionally(e);
+                }
             }
         }, 2, TimeUnit.SECONDS);
 
-        debounceTasks.put(id, newTask);
-        return postDTO; // 즉시 응답 반환
+        // future 반환하여 동기적으로 결과를 대기하고 반환
+        try {
+            return future.get();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve updated post: " + e.getMessage());
+        }
     }
 
     @PreDestroy
@@ -81,7 +105,7 @@ public class PostService {
         scheduler.shutdown();
     }
 
-    public PostDTO updatePost(UserPrincipal userPrincipal, String id, PostDTO postDTO) {
+    public PostDTO updatePost(String id, PostDTO postDTO, UserPrincipal userPrincipal) {
         try {
             // User ID를 통해 User 엔티티 조회
             User user = userRepository.findById(userPrincipal.getId())
@@ -96,6 +120,7 @@ public class PostService {
                 throw new RuntimeException("Not authorized to update this post");
             }
             post.setId(id);
+            post.setAuthorId(post.getAuthorId());
             post.setTitle(postDTO.getTitle());
             post.setContent(postDTO.getContent());
             post.setCategoryId(postDTO.getCategoryId());

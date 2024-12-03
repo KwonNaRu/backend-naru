@@ -27,7 +27,7 @@ public class WebSocketController {
         UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) principal;
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        PostDTO savedPost = postService.updatePostWithDebounce(userPrincipal, postDTO.getId(), postDTO);
+        PostDTO savedPost = postService.debounceUpdate(postDTO.getId(), postDTO, userPrincipal);
         messagingTemplate.convertAndSend("/topic/posts", savedPost);
     }
 }
