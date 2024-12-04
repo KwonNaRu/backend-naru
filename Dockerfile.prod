@@ -18,7 +18,8 @@ RUN mkdir -p extracted && \
     cd extracted && \
     jar -xf /app/app.jar && \
     rm -f BOOT-INF/classes/application-build.yml && \
-    jar -cfm /app/app.jar META-INF/MANIFEST.MF -C . . && \
+    jar -cfm /app/app-cleaned.jar META-INF/MANIFEST.MF -C . . && \
+    mv /app/app-cleaned.jar /app/app.jar && \
     cd .. && rm -rf extracted
 
 # 애플리케이션 실행
