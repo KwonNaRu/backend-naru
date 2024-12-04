@@ -13,12 +13,12 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 COPY --from=builder /app/build/libs/backend-0.0.1-SNAPSHOT.jar app.jar
 
-# jar파일 내의 application-build.yml 파일 제거
+# JAR 파일에서 application-build.yml 제거
 RUN mkdir -p extracted && \
     cd extracted && \
     jar -xf /app/app.jar && \
     rm -f BOOT-INF/classes/application-build.yml && \
-    jar -cf /app/app.jar . && \
+    jar -cfm /app/app.jar META-INF/MANIFEST.MF . && \
     cd .. && rm -rf extracted
 
 # 애플리케이션 실행
