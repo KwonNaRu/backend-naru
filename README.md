@@ -93,3 +93,24 @@ docker-compose down
 docker build --no-cache -f Dockerfile.prod -t dmdmdm1322/naru-backend-prod:latest .
 docker push dmdmdm1322/naru-backend-prod:latest
 ```
+
+---
+
+# **상용 빌드/배포 자동화를 위한 빌드 및 실행 환경 요구사항**
+
+## **1. 빌드 시 Config 파일 처리**
+
+-   GitHub 저장소에서 `naru-config-prod.yml` 파일을 복사하여 **`application-build.yml`** 파일을 생성.
+-   빌드 시 **`build` 프로파일**을 사용하여 해당 설정 파일을 적용.
+
+## **2. 민감 정보 관리**
+
+-   `application-build.yml` 파일에는 민감 정보가 포함되어 있으므로, 빌드 결과물인 **`app.jar` 파일에서 제외**해야 함.
+
+## **3. Gradle 설정**
+
+-   `build.gradle` 파일에서 **`processResources` 태스크를 재정의**하여, **`application-build.yml` 파일이 JAR 파일에 포함되지 않도록 설정**.
+
+## **4. 실행 시 프로파일 설정**
+
+-   Docker Compose를 사용해 애플리케이션을 실행할 때는 **`prod` 프로파일**을 활성화하여 프로덕션 환경에서 동작하도록 설정.
