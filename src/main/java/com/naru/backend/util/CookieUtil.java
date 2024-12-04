@@ -42,6 +42,8 @@ public class CookieUtil {
         Cookie refreshTokenCookie = setRefreshTokenCookie(tokens.get("refreshToken"));
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
+        response.addHeader("Set-Cookie", accessTokenCookie.toString() + "; SameSite=None; Secure");
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString() + "; SameSite=None; Secure");
     }
 
     public Map<String, String> generateTokens(UserPrincipal userPrincipal, String email) {
