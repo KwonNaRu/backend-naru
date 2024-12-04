@@ -6,21 +6,21 @@ COPY . .
 # gradlew 파일에 실행 권한 추가
 RUN chmod +x ./gradlew  
 # Gradle 빌드 실행
-RUN SPRING_PROFILES_ACTIVE=build ./gradlew clean build --no-daemon --info
+RUN SPRING_PROFILES_ACTIVE=build ./gradlew clean bootJar --no-daemon --info
 
 # 실행 단계
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 COPY --from=builder /app/build/libs/backend-0.0.1-SNAPSHOT.jar app.jar
 
-# JAR 파일에서 application-build.yml 제거
-RUN mkdir -p extracted && \
-    cd extracted && \
-    jar -xf /app/app.jar && \
-    rm -f BOOT-INF/classes/application-build.yml && \
-    jar -cfm /app/app-cleaned.jar META-INF/MANIFEST.MF -C . . && \
-    mv /app/app-cleaned.jar /app/app.jar && \
-    cd .. && rm -rf extracted
+# # JAR 파일에서 application-build.yml 제거
+# RUN mkdir -p extracted && \
+#     cd extracted && \
+#     jar -xf /app/app.jar && \
+#     rm -f BOOT-INF/classes/application-build.yml && \
+#     jar -cfm /app/app-cleaned.jar META-INF/MANIFEST.MF -C . . && \
+#     mv /app/app-cleaned.jar /app/app.jar && \
+#     cd .. && rm -rf extracted
 
 # 애플리케이션 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]
