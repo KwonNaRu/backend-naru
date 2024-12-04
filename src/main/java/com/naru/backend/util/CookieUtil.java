@@ -26,6 +26,7 @@ public class CookieUtil {
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setSecure(true); // HTTPS에서만 전송되도록 설정 (필요에 따라)
         accessTokenCookie.setPath("/");
+        accessTokenCookie.setAttribute("SameSite", "None");
         return accessTokenCookie;
     }
 
@@ -34,6 +35,7 @@ public class CookieUtil {
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(true); // HTTPS에서만 전송
         refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setAttribute("SameSite", "None");
         return refreshTokenCookie;
     }
 
@@ -42,8 +44,6 @@ public class CookieUtil {
         Cookie refreshTokenCookie = setRefreshTokenCookie(tokens.get("refreshToken"));
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
-        response.addHeader("Set-Cookie", accessTokenCookie.toString() + "; SameSite=None; Secure");
-        response.addHeader("Set-Cookie", refreshTokenCookie.toString() + "; SameSite=None; Secure");
     }
 
     public Map<String, String> generateTokens(UserPrincipal userPrincipal, String email) {
