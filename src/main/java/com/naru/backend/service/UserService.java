@@ -108,6 +108,8 @@ public class UserService {
 
             UserPrincipal userPrincipal = UserPrincipal.create(user);
             Map<String, String> tokens = cookieUtil.generateTokens(userPrincipal, user.getEmail());
+            tokenService.saveAccessToken(user.getEmail(), tokens.get("NID_AUTH"));
+            tokenService.saveRefreshToken(user.getEmail(), tokens.get("refreshToken"));
             return tokens;
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Wrong password");
@@ -139,6 +141,8 @@ public class UserService {
         if (tokenService.validateRefreshToken(email, refreshToken)) {
             UserPrincipal userPrincipal = (UserPrincipal) userDetailsService.loadUserByUsername(email);
             Map<String, String> tokens = cookieUtil.generateTokens(userPrincipal, email);
+            tokenService.saveAccessToken(email, tokens.get("NID_AUTH"));
+            tokenService.saveRefreshToken(email, tokens.get("refreshToken"));
             return tokens;
         }
 

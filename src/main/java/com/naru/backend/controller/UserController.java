@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -146,8 +147,14 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestParam String email) {
-        tokenService.deleteTokens(email);
-        return ResponseEntity.ok("로그아웃 되었습니다.");
+    public ResponseEntity<?> logout(HttpServletResponse response, @RequestBody String email) {
+        try {
+            SecurityContextHolder.clearContext();
+            tokenService.deleteTokens(email);
+            tokenService.deleteTokenCookies(response);
+            return ResponseEntity.ok("로그아웃 되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("로그아웃 처리 중 오류가 발생했습니다.");
+        }
     }
 }

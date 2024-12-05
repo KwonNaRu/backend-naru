@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.naru.backend.security.UserPrincipal;
-import com.naru.backend.service.TokenService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,11 +13,9 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class CookieUtil {
     private final JwtUtil jwtUtil;
-    private final TokenService tokenService;
 
-    public CookieUtil(JwtUtil jwtUtil, TokenService tokenService) {
+    public CookieUtil(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
-        this.tokenService = tokenService;
     }
 
     public Cookie setAccessTokenCookie(String accessToken) {
@@ -46,6 +43,24 @@ public class CookieUtil {
         response.addCookie(refreshTokenCookie);
     }
 
+    public void deleteTokenCookies(HttpServletResponse response) {
+        // 3. 쿠키 만료 처리
+        Cookie accessTokenCookie = new Cookie("NID_AUTH", null);
+        accessTokenCookie.setMaxAge(0);
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setSecure(true);
+
+        Cookie refreshTokenCookie = new Cookie("refreshToken", null);
+        refreshTokenCookie.setMaxAge(0);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+    }
+
     public Map<String, String> generateTokens(UserPrincipal userPrincipal, String email) {
         Map<String, String> tokens = new HashMap<>();
         String accessToken = refreshAccessToken(userPrincipal, email);
@@ -57,19 +72,11 @@ public class CookieUtil {
 
     public String refreshAccessToken(UserPrincipal userPrincipal, String email) {
         String accessToken = jwtUtil.generateToken(userPrincipal);
-
-        // Redis에 토큰 저장
-        tokenService.saveAccessToken(email, accessToken);
-
         return accessToken;
     }
 
     public String refreshRefreshToken(UserPrincipal userPrincipal, String email) {
         String refreshToken = jwtUtil.generateRefreshToken(userPrincipal);
-
-        // Redis에 토큰 저장
-        tokenService.saveRefreshToken(email, refreshToken);
-
         return refreshToken;
     }
 }

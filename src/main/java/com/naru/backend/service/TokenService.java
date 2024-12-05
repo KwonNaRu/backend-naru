@@ -3,15 +3,23 @@ package com.naru.backend.service;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.naru.backend.util.CookieUtil;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class TokenService {
-    private final RedisTemplate<String, String> redisTemplate;
+
     private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60; // 7일
 
-    public TokenService(RedisTemplate<String, String> redisTemplate) {
+    private final RedisTemplate<String, String> redisTemplate;
+    private final CookieUtil cookieUtil;
+
+    public TokenService(RedisTemplate<String, String> redisTemplate, CookieUtil cookieUtil) {
         this.redisTemplate = redisTemplate;
+        this.cookieUtil = cookieUtil;
     }
 
     public void saveRefreshToken(String email, String refreshToken) {
@@ -37,6 +45,10 @@ public class TokenService {
     public void deleteTokens(String email) {
         redisTemplate.delete("refresh_token:" + email);
         redisTemplate.delete("access_token:" + email);
+    }
+
+    public void deleteTokenCookies(HttpServletResponse response) {
+        cookieUtil.deleteTokenCookies(response);
     }
 
     public boolean validateRefreshToken(String email, String refreshToken) {
