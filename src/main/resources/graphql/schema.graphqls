@@ -1,0 +1,24 @@
+type Category {
+    id: ID!
+    name: String!
+}
+
+type Post {
+    id: ID!
+    title: String!
+    content: String!
+    category: Category!
+}
+
+type Query {
+    posts: [Post!]!
+    categories: [Category!]!
+}
+
+type Mutation {
+    createPost(title: String!, content: String!, categoryId: ID!): Post!
+}
+
+type Subscription {
+    postCreated: Post!
+}
