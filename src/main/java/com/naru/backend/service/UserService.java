@@ -136,7 +136,7 @@ public class UserService {
     }
 
     public Map<String, String> refreshAccessToken(String refreshToken) {
-        String email = jwtUtil.extractUsername(refreshToken);
+        String email = jwtUtil.extractEmail(refreshToken);
 
         if (tokenService.validateRefreshToken(email, refreshToken)) {
             UserPrincipal userPrincipal = (UserPrincipal) userDetailsService.loadUserByUsername(email);

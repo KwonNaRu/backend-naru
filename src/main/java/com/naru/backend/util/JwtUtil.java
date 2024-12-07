@@ -47,13 +47,13 @@ public class JwtUtil {
     }
 
     // JWT에서 사용자 이름을 추출하는 메소드
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return getClaims(token).getSubject();
     }
 
-    public String extractEmail(String token) {
+    public String extractUsername(String token) {
         try {
-            return getClaims(token).getStringClaim("email");
+            return getClaims(token).getStringClaim("username");
         } catch (ParseException e) {
             throw new RuntimeException("토큰 파싱 중 오류 발생", e);
         }
@@ -61,8 +61,8 @@ public class JwtUtil {
 
     // JWT의 유효성을 확인하는 메소드
     public boolean isTokenValid(String token, UserPrincipal userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getEmail()) && !isTokenExpired(token));
+        final String email = extractEmail(token);
+        return (email.equals(userDetails.getEmail()) && !isTokenExpired(token));
     }
 
     // JWT의 만료 여부를 확인하는 메소드

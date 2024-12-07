@@ -97,7 +97,7 @@ public class UserController {
                     .map(Cookie::getValue)
                     .orElseThrow(() -> new RuntimeException("Refresh token not found"));
 
-            String email = jwtUtil.extractUsername(refreshToken);
+            String email = jwtUtil.extractEmail(refreshToken);
 
             // refreshToken 검증 및 새로운 accessToken 발급
             Map<String, String> tokens = userService.refreshAccessToken(refreshToken);
@@ -127,7 +127,7 @@ public class UserController {
                     .map(Cookie::getValue)
                     .orElseThrow(() -> new RuntimeException("Refresh token not found"));
 
-            String email = jwtUtil.extractUsername(accessToken);
+            String email = jwtUtil.extractEmail(accessToken);
 
             // Redis에 저장된 토큰과 비교
             String storedToken = tokenService.getAccessToken(email);

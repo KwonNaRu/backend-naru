@@ -46,7 +46,6 @@ public class PostService {
         post.setAuthor(user.getUsername());
 
         Post newPost = postRepository.save(post);
-        // mutationResolver.createPost(newPost);
 
         return new PostDTO(newPost);
     }

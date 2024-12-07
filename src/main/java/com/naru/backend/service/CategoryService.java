@@ -55,23 +55,18 @@ public class CategoryService {
                 }).toList();
     }
 
-    public CategoryDTO createCategory(CategoryDTO categoryDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
+    public CategoryDTO createCategory(CategoryDTO categoryDto, UserPrincipal userPrincipal) {
         Category category = new Category();
-        if (authentication != null && authentication.isAuthenticated()) {
-            UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-            // User ID를 통해 User 엔티티 조회
-            User user = userRepository.findById(userPrincipal.getId())
-                    .orElseThrow(
-                            () -> new UsernameNotFoundException("User not found with ID: " + userPrincipal.getId()));
+        // User ID를 통해 User 엔티티 조회
+        User user = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(
+                        () -> new UsernameNotFoundException("User not found with ID: " + userPrincipal.getId()));
 
-            // Category 엔티티에 User 설정
+        // Category 엔티티에 User 설정
+        category.setName(categoryDto.getName());
+        category.setUser(user);
 
-            category.setName(categoryDto.getName());
-            category.setUser(user);
-        }
         Category newCategory = categoryRepository.save(category);
         return new CategoryDTO(newCategory);
     }

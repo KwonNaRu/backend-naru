@@ -46,7 +46,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         if (jwtToken != null) {
             try {
-                String email = jwtUtil.extractUsername(jwtToken);
+                String email = jwtUtil.extractEmail(jwtToken);
 
                 // Redis에 저장된 토큰과 비교
                 String storedToken = tokenService.getAccessToken(email);
