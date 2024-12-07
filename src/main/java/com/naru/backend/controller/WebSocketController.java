@@ -42,12 +42,7 @@ public class WebSocketController {
         UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) principal;
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        if (!userPrincipal.getAuthorities().stream()
-                .anyMatch(auth -> "OWNER".equals(auth.getAuthority()))) {
-            throw new AccessDeniedException("OWNER 권한이 필요합니다.");
-        }
-
-        CategoryDTO savedCategory = categoryService.createCategory(categoryDTO);
+        CategoryDTO savedCategory = categoryService.createCategory(categoryDTO, userPrincipal);
         messagingTemplate.convertAndSend("/topic/create/category", savedCategory);
     }
 }

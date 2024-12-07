@@ -59,6 +59,14 @@ public class JwtUtil {
         }
     }
 
+    public String extractRole(String token) {
+        try {
+            return getClaims(token).getStringClaim("role");
+        } catch (ParseException e) {
+            throw new RuntimeException("토큰 파싱 중 오류 발생", e);
+        }
+    }
+
     // JWT의 유효성을 확인하는 메소드
     public boolean isTokenValid(String token, UserPrincipal userDetails) {
         final String email = extractEmail(token);

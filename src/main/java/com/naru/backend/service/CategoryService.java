@@ -1,5 +1,14 @@
 package com.naru.backend.service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
 import com.naru.backend.dto.CategoryDTO;
 import com.naru.backend.model.Category;
 import com.naru.backend.model.Post;
@@ -8,17 +17,6 @@ import com.naru.backend.repository.CategoryRepository;
 import com.naru.backend.repository.PostRepository;
 import com.naru.backend.repository.UserRepository;
 import com.naru.backend.security.UserPrincipal;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -66,6 +64,7 @@ public class CategoryService {
         // Category 엔티티에 User 설정
         category.setName(categoryDto.getName());
         category.setUser(user);
+        category.setPosts(Collections.emptyList());
 
         Category newCategory = categoryRepository.save(category);
         return new CategoryDTO(newCategory);
