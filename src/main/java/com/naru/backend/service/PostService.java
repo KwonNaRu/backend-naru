@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.naru.backend.dto.PostDTO;
-import com.naru.backend.graphql.MutationResolver;
 import com.naru.backend.model.Post;
 import com.naru.backend.model.User;
 import com.naru.backend.repository.PostRepository;
@@ -35,9 +34,6 @@ public class PostService {
     @Autowired
     private SecurityUtil securityUtil;
 
-    @Autowired
-    private MutationResolver mutationResolver;
-
     public List<PostDTO> getAllPosts() {
         return postRepository.findByCategoryIdIsNull().stream().map(PostDTO::new).toList();
     }
@@ -45,13 +41,12 @@ public class PostService {
     public PostDTO createPost() {
         User user = securityUtil.getAuthenticatedUser();
 
-        
         Post post = new Post();
         post.setAuthorId(user.getUserId());
         post.setAuthor(user.getUsername());
 
         Post newPost = postRepository.save(post);
-        mutationResolver.createPost(newPost);
+        // mutationResolver.createPost(newPost);
 
         return new PostDTO(newPost);
     }

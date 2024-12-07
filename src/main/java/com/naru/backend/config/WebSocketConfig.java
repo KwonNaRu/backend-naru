@@ -21,7 +21,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws")
+        registry.addEndpoint("/ws", "/subscriptions")
                 .setAllowedOriginPatterns("http://localhost:3000", "https://mixed-naru.vercel.app") // 개발 환경에서는 모든 오리진
                                                                                                     // 허용 가능
                 .withSockJS();

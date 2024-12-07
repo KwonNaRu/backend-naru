@@ -50,7 +50,7 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/ws/**", "/subscriptions/**").permitAll()
                         .requestMatchers("/auth/**").permitAll() // Spring Security 5.x
                         .requestMatchers("/**").permitAll()
                         .anyRequest().permitAll()

@@ -10,17 +10,19 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class CategoryDto {
+public class CategoryDTO {
 
     private Long id;
     private String name;
-    private UserResponseDTO user;
+    private String userEmail;
+    private String userName;
     private List<Post> posts;
 
-    public CategoryDto(Category category) {
+    public CategoryDTO(Category category) {
         this.id = category.getId();
         this.name = category.getName();
-        this.user = new UserResponseDTO(category.getUser());
+        this.userEmail = category.getUser().getEmail();
+        this.userName = category.getUser().getUsername();
         this.posts = category.getPosts();
     }
 }

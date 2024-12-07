@@ -1,6 +1,6 @@
 package com.naru.backend.service;
 
-import com.naru.backend.dto.CategoryDto;
+import com.naru.backend.dto.CategoryDTO;
 import com.naru.backend.model.Category;
 import com.naru.backend.model.Post;
 import com.naru.backend.model.User;
@@ -32,7 +32,7 @@ public class CategoryService {
     @Autowired
     private PostRepository postRepository;
 
-    public List<CategoryDto> getAllCategories() {
+    public List<CategoryDTO> getAllCategories() {
         // 1. 모든 카테고리 조회
         List<Category> categories = categoryRepository.findAll();
 
@@ -49,13 +49,13 @@ public class CategoryService {
         // 4. CategoryDto 생성 시 매핑된 포스트 할당
         return categories.stream()
                 .map(category -> {
-                    CategoryDto dto = new CategoryDto(category);
+                    CategoryDTO dto = new CategoryDTO(category);
                     dto.setPosts(postsByCategory.getOrDefault(category.getId(), Collections.emptyList()));
                     return dto;
                 }).toList();
     }
 
-    public CategoryDto createCategory(CategoryDto categoryDto) {
+    public CategoryDTO createCategory(CategoryDTO categoryDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         Category category = new Category();
@@ -72,7 +72,8 @@ public class CategoryService {
             category.setName(categoryDto.getName());
             category.setUser(user);
         }
-        return new CategoryDto(categoryRepository.save(category));
+        Category newCategory = categoryRepository.save(category);
+        return new CategoryDTO(newCategory);
     }
 
     public void deleteCategory(Long id) {
