@@ -5,7 +5,6 @@ import java.security.Principal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +34,15 @@ public class WebSocketController {
 
         PostDTO savedPost = postService.debounceUpdate(postDTO.getId(), postDTO, userPrincipal);
         messagingTemplate.convertAndSend("/topic/posts", savedPost);
+    }
+
+    @MessageMapping("/create/post")
+    public void createPost(Principal principal) {
+        UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) principal;
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+        PostDTO savedPost = postService.createPost(userPrincipal);
+        messagingTemplate.convertAndSend("/topic/create/post", savedPost);
     }
 
     @MessageMapping("/category")

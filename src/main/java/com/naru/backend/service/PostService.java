@@ -18,7 +18,6 @@ import com.naru.backend.model.User;
 import com.naru.backend.repository.PostRepository;
 import com.naru.backend.repository.UserRepository;
 import com.naru.backend.security.UserPrincipal;
-import com.naru.backend.util.SecurityUtil;
 
 import jakarta.annotation.PreDestroy;
 
@@ -31,15 +30,25 @@ public class PostService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private SecurityUtil securityUtil;
-
     public List<PostDTO> getAllPosts() {
         return postRepository.findByCategoryIdIsNull().stream().map(PostDTO::new).toList();
     }
 
-    public PostDTO createPost() {
-        User user = securityUtil.getAuthenticatedUser();
+    // public PostDTO createPost() {
+    // User user = securityUtil.getAuthenticatedUser();
+
+    // Post post = new Post();
+    // post.setAuthorId(user.getUserId());
+    // post.setAuthor(user.getUsername());
+
+    // Post newPost = postRepository.save(post);
+
+    // return new PostDTO(newPost);
+    // }
+
+    public PostDTO createPost(UserPrincipal userPrincipal) {
+        User user = userRepository.findByEmail(userPrincipal.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         Post post = new Post();
         post.setAuthorId(user.getUserId());

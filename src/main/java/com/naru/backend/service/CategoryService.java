@@ -58,8 +58,7 @@ public class CategoryService {
 
         // User ID를 통해 User 엔티티 조회
         User user = userRepository.findById(userPrincipal.getId())
-                .orElseThrow(
-                        () -> new UsernameNotFoundException("User not found with ID: " + userPrincipal.getId()));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + userPrincipal.getId()));
 
         // Category 엔티티에 User 설정
         category.setName(categoryDto.getName());

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,10 +27,10 @@ public class PostController {
     }
 
     // 글 생성
-    @PostMapping
-    public PostDTO createPost() {
-        return postService.createPost();
-    }
+    // @PostMapping
+    // public PostDTO createPost() {
+    // return postService.createPost();
+    // }
 
     // 특정 글 조회
     @GetMapping("/{id}")
