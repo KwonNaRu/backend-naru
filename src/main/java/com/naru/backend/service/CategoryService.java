@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.naru.backend.dto.CategoryDTO;
+import com.naru.backend.dto.CategoryDto;
 import com.naru.backend.model.Category;
 import com.naru.backend.model.Post;
 import com.naru.backend.model.User;
@@ -30,7 +30,7 @@ public class CategoryService {
     @Autowired
     private PostRepository postRepository;
 
-    public List<CategoryDTO> getAllCategories() {
+    public List<CategoryDto> getAllCategories() {
         // 1. 모든 카테고리 조회
         List<Category> categories = categoryRepository.findAll();
 
@@ -47,13 +47,13 @@ public class CategoryService {
         // 4. CategoryDTO 생성 시 매핑된 포스트 할당
         return categories.stream()
                 .map(category -> {
-                    CategoryDTO dto = new CategoryDTO(category);
+                    CategoryDto dto = new CategoryDto(category);
                     dto.setPosts(postsByCategory.getOrDefault(category.getId(), Collections.emptyList()));
                     return dto;
                 }).toList();
     }
 
-    public CategoryDTO createCategory(CategoryDTO categoryDto, UserPrincipal userPrincipal) {
+    public CategoryDto createCategory(CategoryDto categoryDto, UserPrincipal userPrincipal) {
         Category category = new Category();
 
         // User ID를 통해 User 엔티티 조회
@@ -66,7 +66,7 @@ public class CategoryService {
         category.setPosts(Collections.emptyList());
 
         Category newCategory = categoryRepository.save(category);
-        return new CategoryDTO(newCategory);
+        return new CategoryDto(newCategory);
     }
 
     public void deleteCategory(Long id) {

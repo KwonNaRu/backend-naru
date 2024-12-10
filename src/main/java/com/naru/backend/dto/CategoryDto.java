@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class CategoryDTO {
+public class CategoryDto {
 
     private Long id;
     private String name;
@@ -18,7 +18,7 @@ public class CategoryDTO {
     private String userName;
     private List<Post> posts;
 
-    public CategoryDTO(Category category) {
+    public CategoryDto(Category category) {
         this.id = category.getId();
         this.name = category.getName();
         this.userEmail = category.getUser().getEmail();

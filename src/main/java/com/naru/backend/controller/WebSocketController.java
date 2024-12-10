@@ -9,7 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.naru.backend.dto.CategoryDTO;
+import com.naru.backend.dto.CategoryDto;
 import com.naru.backend.dto.PostDTO;
 import com.naru.backend.security.UserPrincipal;
 import com.naru.backend.service.CategoryService;
@@ -46,11 +46,11 @@ public class WebSocketController {
     }
 
     @MessageMapping("/category")
-    public void createCategory(Principal principal, @RequestBody CategoryDTO categoryDTO) {
+    public void createCategory(Principal principal, @RequestBody CategoryDto categoryDTO) {
         UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) principal;
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        CategoryDTO savedCategory = categoryService.createCategory(categoryDTO, userPrincipal);
+        CategoryDto savedCategory = categoryService.createCategory(categoryDTO, userPrincipal);
         messagingTemplate.convertAndSend("/topic/create/category", savedCategory);
     }
 }
