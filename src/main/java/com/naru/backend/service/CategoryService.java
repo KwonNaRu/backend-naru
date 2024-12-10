@@ -44,7 +44,7 @@ public class CategoryService {
                 .stream()
                 .collect(Collectors.groupingBy(Post::getCategoryId));
 
-        // 4. CategoryDto 생성 시 매핑된 포스트 할당
+        // 4. CategoryDTO 생성 시 매핑된 포스트 할당
         return categories.stream()
                 .map(category -> {
                     CategoryDTO dto = new CategoryDTO(category);
